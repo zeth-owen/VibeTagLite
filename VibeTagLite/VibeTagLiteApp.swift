@@ -9,9 +9,22 @@ import SwiftUI
 
 @main
 struct VibeTagLiteApp: App {
+    
+    @UIApplicationDelegateAdaptor(AppDelegate.self) var appDelegate
+    
+    let userManager = UserManager()
+    let vibeManager = VibeManager()
+    let featuredPhotoManager = FeaturedPhotoManager()
+    let photoLocationManager = PhotoLocationManager()
+    
     var body: some Scene {
         WindowGroup {
-            ContentView()
+            AppTabView()
+                .environment(vibeManager)
+                .environment(userManager)
+                .environmentObject(featuredPhotoManager)
+                .environmentObject(photoLocationManager)
+           
         }
     }
 }
