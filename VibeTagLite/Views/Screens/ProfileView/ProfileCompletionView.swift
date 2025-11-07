@@ -12,6 +12,7 @@ struct ProfileCompletionView: View {
     @Bindable var viewModel: ProfileViewModel
     @Environment(VibeManager.self) var vibeManager
     @Environment(UserManager.self) var userManager
+    @State private var showDeleteConfirmation = false
     
     
     
@@ -54,7 +55,7 @@ struct ProfileCompletionView: View {
              
             }
             Button("Delete Account") {
-                // Delete action here
+                showDeleteConfirmation = true
             }
             .frame(width: 120, height: 20)
             .padding()
@@ -68,6 +69,18 @@ struct ProfileCompletionView: View {
         }
         .refreshable { viewModel.getCompletedVibes(for: userManager) }
         .alert(item: $viewModel.alertItem, content: { $0.alert })
+        .confirmationDialog(
+            "Delete Account",
+            isPresented: $showDeleteConfirmation,
+            titleVisibility: .visible
+        ) {
+            Button("Delete Account", role: .destructive) {
+                viewModel.deleteUserAndAssociatedRecords(for: userManager)
+            }
+            Button("Cancel", role: .cancel) { }
+        } message: {
+            Text("Are you sure you want to delete your account? This will permanently delete your profile and all associated data. This action cannot be undone.")
+        }
     }
     
     

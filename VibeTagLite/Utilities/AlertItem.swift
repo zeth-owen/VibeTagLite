@@ -84,6 +84,14 @@ struct AlertContext {
         title: Text("Unable to Sign In with Apple"),
         message: Text("Please close the app and try again. If the issue persists, contact support."),
         dismissButton: .default(Text("Ok")))
+    static let userDeletionSuccess = AlertItem (
+        title: Text("Account Deleted"),
+        message: Text("Your profile and all associated data have been successfully deleted."),
+        dismissButton: .default(Text("Ok")))
+    static let userDeletionFailure = AlertItem (
+        title: Text("Deletion Failed"),
+        message: Text("We were unable to delete your account at this time. Please try again or contact customer support if this persists."),
+        dismissButton: .default(Text("Ok")))
     
     //MARK: -VibeDetailErrors
     static let invalidPhoneNumber = AlertItem (

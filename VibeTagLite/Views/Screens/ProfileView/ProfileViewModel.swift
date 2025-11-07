@@ -166,10 +166,61 @@ final class ProfileViewModel {
         }
     }
     
-
     
+    func deleteUserAndAssociatedRecords(for userManager: UserManager, deleteUserRecord: Bool = true) {
+        guard let profileRecordID = CloudKitManager.shared.profileRecordID else {
+            alertItem = AlertContext.noUserRecord
+            return
+        }
+        
+        guard let userRecord = CloudKitManager.shared.userRecord else {
+            alertItem = AlertContext.noUserRecord
+            return
+        }
+        
+        showLoadingView()
+        
+        Task {
+            do {
+                let userVibeProgressRecords = try await CloudKitManager.shared.getCompletedVibes(for: profileRecordID)
+                let progressRecordIDs = userVibeProgressRecords.map { $0.recordID }
+                
+                if !progressRecordIDs.isEmpty {
+                    try await CloudKitManager.shared.batchDelete(recordIDs: progressRecordIDs)
+                }
+                
+                try await CloudKitManager.shared.deleteRecord(with: profileRecordID)
+                
+                if deleteUserRecord {
+                    userRecord["userProfile"] = nil
+                    _ = try await CloudKitManager.shared.save(record: userRecord)
+                }
+                
+                DispatchQueue.main.async {
+                    CloudKitManager.shared.profileRecordID = nil
+                    self.existingProfileRecord = nil
+                    self.firstName = "to"
+                    self.lastName = "VibeTag"
+                    
+                    userManager.completedVibes.removeAll()
+                    userManager.firstName = ""
+                    userManager.lastName = ""
+                    userManager.isBusinessOwner = false
+                    
+                    self.isShowingProfileCompletionView = false
+                    self.alertItem = AlertContext.userDeletionSuccess
+                }
+                
+                hideLoadingView()
+                
+            } catch {
+                hideLoadingView()
+                alertItem = AlertContext.userDeletionFailure
+                print("Error deleting user and associated records: \(error.localizedDescription)")
+            }
+        }
+    }
 
-    
     private func showLoadingView() { isLoading = true }
     private func hideLoadingView() { isLoading = false }
 }

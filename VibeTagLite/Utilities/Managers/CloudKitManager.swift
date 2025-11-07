@@ -134,6 +134,29 @@ final class CloudKitManager {
     func fetchRecord(with id: CKRecord.ID) async throws -> CKRecord {
         return try await container.publicCloudDatabase.record(for: id)
     }
+    
+    
+    func deleteRecord(with id: CKRecord.ID) async throws {
+        _ = try await container.publicCloudDatabase.deleteRecord(withID: id)
+    }
+    
+    
+    func batchDelete(recordIDs: [CKRecord.ID]) async throws {
+        let (_, deleteErrors) = try await container.publicCloudDatabase.modifyRecords(saving: [], deleting: recordIDs)
+        
+        if !deleteErrors.isEmpty {
+            let failedDeletions = deleteErrors.compactMap { recordID, result in
+                if case .failure(let error) = result {
+                    return "Failed to delete \(recordID): \(error.localizedDescription)"
+                }
+                return nil
+            }
+            
+            if !failedDeletions.isEmpty {
+                print("Some deletions failed: \(failedDeletions.joined(separator: ", "))")
+            }
+        }
+    }
 }
 
 
